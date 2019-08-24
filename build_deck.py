@@ -103,15 +103,51 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
     templates=[
         {
             'name': 'Name from Map',
-            'qfmt': '{{Region}}<br>?<hr>{{SubdivisionMap}}',
-            'afmt': '{{Region}}<br>{{Subdivision}}<hr>{{SubdivisionMap}}',
+            'qfmt':
+                '''
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">?</div>
+                    <hr>
+                    {{SubdivisionMap}}
+                ''',
+            'afmt':
+                '''
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">{{Subdivision}}</div>
+                    <hr>
+                    {{SubdivisionMap}}
+                ''',
         },
         {
             'name': 'Map from Name',
-            'qfmt': '{{Region}}<br>{{Subdivision}}<hr>{{RegionMap}}',
-            'afmt': '{{Region}}<br>{{Subdivision}}<hr>{{SubdivisionMap}}',
+            'qfmt':
+                '''
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">{{Subdivision}}</div>
+                    <hr>
+                    {{RegionMap}}
+                ''',
+            'afmt':
+                '''
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">{{Subdivision}}</div>
+                    <hr>
+                    {{SubdivisionMap}}
+                ''',
         },
-    ]
+    ],
+    css='''
+        .card {
+            font-size: 20px;
+            text-align: center;
+        }
+        #region {
+            color: gray;
+        }
+        #subdivision {
+            font-size: 30px;
+        }
+    ''',
 )
 
 
