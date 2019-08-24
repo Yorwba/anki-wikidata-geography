@@ -83,7 +83,7 @@ def create_background_map(raster_maps, region_label):
     if len(raster_maps) == 1:
         print("Can't infer background from only a single map.")
         return None
-    stacked_maps = np.array([np.array(i) for i in raster_maps])
+    stacked_maps = np.array([np.array(i.convert('RGBA')) for i in raster_maps])
     median = np.median(stacked_maps, axis=0)
     background = Image.fromarray(np.array(median, dtype=stacked_maps.dtype))
     filename = region_label + '.png'
