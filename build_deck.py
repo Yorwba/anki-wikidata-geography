@@ -4,6 +4,7 @@ import argparse
 from collections import Counter
 import datetime
 import hashlib
+import http.client
 import os
 import subprocess
 import urllib.request
@@ -66,8 +67,13 @@ def download_locator_map(url, filename):
     else:
         origin_map = filename + '.' + url.split('.')[-1]
         raster_map = origin_map
-    with urllib.request.urlopen(url) as map_file:
-        map_data = map_file.read()
+    while True:
+        with urllib.request.urlopen(url) as map_file:
+            try:
+                map_data = map_file.read()
+                break
+            except http.client.IncompleteRead as e:
+                print(f'Incomplete read of {url} Retrying...')
     with open(origin_map, 'wb') as f:
         f.write(map_data)
     if origin_map.endswith('.svg'):
