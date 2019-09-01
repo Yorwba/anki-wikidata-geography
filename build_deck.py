@@ -19,7 +19,16 @@ CLIENT = Client()
 SUBDIVISIONS = CLIENT.get('P150')
 LOCATOR_MAP_IMAGE = CLIENT.get('P242')
 INCEPTION = CLIENT.get('P571')
+START_TIME = CLIENT.get('P580')
 DISSOLVED = CLIENT.get('P576')
+END_TIME = CLIENT.get('P582')
+
+
+def try_get_time_property(entity, prop):
+    try:
+        return entity.get(prop)
+    except DatavalueError:
+        return None # TODO: fix wikidata package to handle dates better
 
 
 def get_subdivisions(entity, date=None):
@@ -28,17 +37,14 @@ def get_subdivisions(entity, date=None):
 
     subdivisions = entity.getlist(SUBDIVISIONS)
     for subdivision in subdivisions:
-        try:
-            inception = subdivision.get(INCEPTION)
-        except DatavalueError:
-            inception = None # TODO: fix wikidata package to handle dates better
-        try:
-            dissolved = subdivision.get(DISSOLVED)
-        except DatavalueError:
-            dissolved = None
-        if inception and inception > date:
-            continue
-        if dissolved and dissolved < date:
+        inception = try_get_time_property(subdivision, INCEPTION)
+        start_time = try_get_time_property(subdivision, START_TIME)
+        dissolved = try_get_time_property(subdivision, DISSOLVED)
+        end_time = try_get_time_property(subdivision, END_TIME)
+        if ((inception and inception > date)
+                or (start_time and start_time > date)
+                or (dissolved and dissolved < date)
+                or (end_time and end_time < date)):
             continue
         yield subdivision
 
