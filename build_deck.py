@@ -74,7 +74,9 @@ def download_locator_map(url, filename):
         origin_map = filename + '.' + url.split('.')[-1]
         raster_map = origin_map
     while True:
-        with urllib.request.urlopen(url) as map_file:
+        req = urllib.request.Request(url)
+        req.headers['Range'] = 'bytes=0-'
+        with urllib.request.urlopen(req) as map_file:
             try:
                 map_data = map_file.read()
                 break
