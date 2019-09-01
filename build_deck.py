@@ -111,6 +111,7 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
         {'name': 'Region'},
         {'name': 'SubdivisionMap'},
         {'name': 'RegionMap'},
+        {'name': 'WikidataId'},
     ],
     templates=[
         {
@@ -128,6 +129,10 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <div id="subdivision">{{Subdivision}}</div>
                     <hr>
                     {{SubdivisionMap}}
+                    <hr>
+                    <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
+                        Data source: Wikidata
+                    </a>
                 ''',
         },
         {
@@ -145,6 +150,10 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <div id="subdivision">{{Subdivision}}</div>
                     <hr>
                     {{SubdivisionMap}}
+                    <hr>
+                    <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
+                        Data source: Wikidata
+                    </a>
                 ''',
         },
     ],
@@ -187,7 +196,7 @@ def main(argv):
         if locator_map_url is None:
             continue
         subdivision_label = subdivision.label[args.language]
-        subdivision_maps[subdivision_label] = download_locator_map(locator_map_url, subdivision_label)
+        subdivision_maps[subdivision] = download_locator_map(locator_map_url, subdivision_label)
     background_map = create_background_map(
         [raster for origin, raster in subdivision_maps.values()],
         region_label
@@ -201,17 +210,18 @@ def main(argv):
     deck = genanki.Deck(deck_id, deck_name)
 
     media_files = [background_map]
-    for subdivision_label, maps in subdivision_maps.items():
+    for subdivision, maps in subdivision_maps.items():
         smallest_map = min(maps, key=lambda path: os.stat(path).st_size)
         media_files.append(smallest_map)
         deck.add_note(
             RegionSubdivisionNote(
                 model=REGION_SUBDIVISION_MODEL,
                 fields=[
-                    subdivision_label,
+                    subdivision.label[args.language],
                     region_label,
                     f'<img src="{smallest_map}">',
                     f'<img src="{background_map}">',
+                    subdivision.id,
                 ]
             )
         )
