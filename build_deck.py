@@ -10,6 +10,7 @@ import os
 import subprocess
 import urllib.request
 import colorlog  # https://github.com/borntyping/python-colorlog
+from os.path import exists
 
 import genanki
 import numpy as np
@@ -50,6 +51,20 @@ def try_get_time_property(entity, prop):
         return result
     except DatavalueError:
         return None  # TODO: fix wikidata package to handle dates better
+
+
+def try_get_string_property(entity, prop):
+    """
+    :param entity:
+    :param prop:
+    :return:
+    :rtype: wikidata.entity.Entity | None
+    """
+    try:
+        result = entity.get(prop)
+        return result
+    except DatavalueError:
+        return None
 
 
 def get_subdivisions(entity, date=None):
@@ -132,9 +147,11 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
     fields=[
         {'name': 'Subdivision'},
         {'name': 'Region'},
+        {'name': 'Capital'},
         {'name': 'SubdivisionMap'},
         {'name': 'RegionMap'},
         {'name': 'WikidataId'},
+        {'name': 'Language'}
     ],
     templates=[
         {
@@ -144,15 +161,17 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <div id="region">{{Region}}</div>
                     <div id="subdivision">?</div>
                     <hr>
-                    {{SubdivisionMap}}
+                    <div class="value">{{SubdivisionMap}}</div>
                 ''',
             'afmt':
                 '''
                     <div id="region">{{Region}}</div>
                     <div id="subdivision">{{Subdivision}}</div>
                     <hr>
-                    {{SubdivisionMap}}
+                    <div class="value">{{SubdivisionMap}}</div>
                     <hr>
+                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Subdivision}}"
+                        style="height: 100vh; width:100%;" seamless="seamless"></iframe>
                     <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
                         Data source: Wikidata
                     </a>
@@ -165,18 +184,66 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <div id="region">{{Region}}</div>
                     <div id="subdivision">{{Subdivision}}</div>
                     <hr>
-                    {{RegionMap}}
+                    <div class="value">{{RegionMap}}</div>
                 ''',
             'afmt':
                 '''
                     <div id="region">{{Region}}</div>
                     <div id="subdivision">{{Subdivision}}</div>
                     <hr>
-                    {{SubdivisionMap}}
+                    <div class="value">{{SubdivisionMap}}</div>
                     <hr>
+                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Subdivision}}"
+                        style="height: 100vh; width:100%;" seamless="seamless"></iframe>
                     <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
                         Data source: Wikidata
                     </a>
+                ''',
+        },
+        {
+            'name': 'Capital from Subdivision',
+            'qfmt':
+                '''
+                {{#Capital}}
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">{{Subdivision}}</div>
+                    <hr>
+                    <div id="type">Capital</div>
+                    <div id="capital">?</div>
+                {{/Capital}}
+                ''',
+            'afmt':
+                '''
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">{{Subdivision}}</div>
+                    <hr>
+                    <div id="type">Capital</div>
+                    <div id="capital">{{Capital}}</div>
+                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Capital}}"
+                        style="height: 100vh; width:100%;" seamless="seamless"></iframe>
+                ''',
+        },
+        {
+            'name': 'Subdivision from Capital',
+            'qfmt':
+                '''
+                {{#Capital}}
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">?</div>
+                    <hr>
+                    <div id="type">Capital</div>
+                    <div id="capital">{{Capital}}</div>
+                {{/Capital}}
+                ''',
+            'afmt':
+                '''
+                    <div id="region">{{Region}}</div>
+                    <div id="subdivision">{{Subdivision}}</div>
+                    <hr>
+                    <div id="type">Capital</div>
+                    <div id="capital">{{Capital}}</div>
+                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Subdivision}}"
+                        style="height: 100vh; width:100%;" seamless="seamless"></iframe>
                 ''',
         },
     ],
@@ -198,7 +265,7 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
 class RegionSubdivisionNote(genanki.Note):
     @property
     def guid(self):
-        return genanki.guid_for(*self.fields[:2])
+        return genanki.guid_for(*self.fields[:3])
 
 
 DECK_ID_BASE = 1290639408 # generated by random.randrange(1 << 30, 1 << 31)
@@ -218,6 +285,8 @@ def main(argv):
         os.mkdir(IMAGE_FOLDER)
     subdivision_maps = {}
     for subdivision in get_subdivisions(region):
+        subdivision_label = subdivision.label[args.language]
+        logger.debug(f'Making map for {subdivision.id}, {subdivision_label}')
         locator_map_url = get_locator_map_url(subdivision)
         if locator_map_url is None:
             continue
@@ -241,15 +310,28 @@ def main(argv):
     for subdivision, maps in subdivision_maps.items():
         smallest_map = min(maps, key=lambda path: os.stat(path).st_size)
         media_files.append(smallest_map)
+        logger.debug(f'Building cards for {subdivision.id}, {subdivision.label[args.language]}')
+        capital = try_get_string_property(subdivision, CAPITAL)
+        if capital is None:
+            capital_label = ""
+        else:
+            try:
+                capital_label = capital.label[args.language]
+            except KeyError:
+                capital_label = capital.label["en"]
+                logger.warning(f'No {args.language} translation for {capital_label}, using English')
+        logger.debug(f'Capital: {capital.id}, {capital_label}')
         deck.add_note(
             RegionSubdivisionNote(
                 model=REGION_SUBDIVISION_MODEL,
                 fields=[
                     subdivision.label[args.language],
                     region_label,
-                    f'<img src="{smallest_map}">',
-                    f'<img src="{background_map}">',
+                    capital_label,
+                    f'<img src="{os.path.basename(smallest_map)}">',
+                    f'<img src="{os.path.basename(background_map)}">',
                     subdivision.id,
+                    args.language
                 ]
             )
         )
