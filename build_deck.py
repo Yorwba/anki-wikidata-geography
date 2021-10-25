@@ -122,9 +122,8 @@ def download_locator_map(url, filename):
                 print(f'Incomplete read of {url} Retrying...')
     with open(origin_map, 'wb') as f:
         f.write(map_data)
-    if origin_map.endswith('.svg'):
-        print(f'Converting {origin_map} to {raster_map}')
-        subprocess.run(['rendersvg', origin_map, raster_map])
+    if origin_map.endswith('.svg') and not exists(raster_map):
+        subprocess.run(['resvg', origin_map, raster_map])
     return origin_map, raster_map
 
 
