@@ -108,7 +108,7 @@ def download_locator_map(url, filename):
         raster_map = f'{IMAGE_FOLDER}/{filename}.png'
     else:
         origin_map = f'{IMAGE_FOLDER}/{filename}.' + url.split('.')[-1]
-        raster_map = f'{IMAGE_FOLDER}/{origin_map}'
+        raster_map = f'{origin_map}'
     while True:
         req = urllib.request.Request(url)
         req.headers['User-Agent'] \
@@ -332,7 +332,7 @@ def main(argv):
             except KeyError:
                 capital_label = capital.label["en"]
                 logger.warning(f'No {args.language} translation for {capital_label}, using English')
-        logger.debug(f'Capital: {capital.id}, {capital_label}')
+            logger.debug(f'Capital: {capital.id}, {capital_label}')
         deck.add_note(
             RegionSubdivisionNote(
                 model=REGION_SUBDIVISION_MODEL,
