@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
 from collections import Counter
 import datetime
 import hashlib
@@ -8,6 +9,7 @@ import http.client
 import os
 import subprocess
 import urllib.request
+import colorlog  # https://github.com/borntyping/python-colorlog
 
 import genanki
 import numpy as np
@@ -15,6 +17,12 @@ from PIL import Image
 from wikidata.client import Client
 from wikidata.datavalue import DatavalueError
 from wikidata.entity import EntityId
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s[%(levelname)s] %(message)s'))
+logger = colorlog.getLogger('anki-geo')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
 
 IMAGE_FOLDER = "img"
 
@@ -99,7 +107,7 @@ def create_background_map(raster_maps, region_label):
     common_size = Counter(i.size for i in raster_maps).most_common(1)[0][0]
     raster_maps = [i for i in raster_maps if i.size == common_size]
     if len(raster_maps) == 1:
-        print("Can't infer background from only a single map.")
+        logger.warning("Can't infer background from only a single map.")
         return None
     stacked_maps = np.array([np.array(i.convert('RGBA')) for i in raster_maps])
     median = np.median(stacked_maps, axis=0)
@@ -196,6 +204,7 @@ def main(argv):
 
     region = CLIENT.get(args.region, load=True)
     region_label = region.label[args.language]
+    logger.info(f'Building deck for {region_label}')
     if not os.path.exists(IMAGE_FOLDER):
         os.mkdir(IMAGE_FOLDER)
     subdivision_maps = {}
@@ -205,6 +214,7 @@ def main(argv):
             continue
         subdivision_label = subdivision.label[args.language]
         subdivision_maps[subdivision] = download_locator_map(locator_map_url, subdivision_label)
+
     background_map = create_background_map(
         [raster for origin, raster in subdivision_maps.values()],
         region_label
@@ -218,6 +228,7 @@ def main(argv):
     deck = genanki.Deck(deck_id, deck_name)
 
     media_files = [background_map]
+
     for subdivision, maps in subdivision_maps.items():
         smallest_map = min(maps, key=lambda path: os.stat(path).st_size)
         media_files.append(smallest_map)
