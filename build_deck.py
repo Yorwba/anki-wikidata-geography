@@ -14,14 +14,16 @@ import numpy as np
 from PIL import Image
 from wikidata.client import Client
 from wikidata.datavalue import DatavalueError
+from wikidata.entity import EntityId
 
 CLIENT = Client()
-SUBDIVISIONS = CLIENT.get('P150')
-LOCATOR_MAP_IMAGE = CLIENT.get('P242')
-INCEPTION = CLIENT.get('P571')
-START_TIME = CLIENT.get('P580')
-DISSOLVED = CLIENT.get('P576')
-END_TIME = CLIENT.get('P582')
+SUBDIVISIONS = CLIENT.get(EntityId('P150'))
+LOCATOR_MAP_IMAGE = CLIENT.get(EntityId('P242'))
+INCEPTION = CLIENT.get(EntityId('P571'))
+START_TIME = CLIENT.get(EntityId('P580'))
+DISSOLVED = CLIENT.get(EntityId('P576'))
+END_TIME = CLIENT.get(EntityId('P582'))
+CAPITAL = CLIENT.get(EntityId('P36'))
 
 
 def try_get_time_property(entity, prop):
@@ -231,6 +233,8 @@ def main(argv):
     package = genanki.Package(deck, media_files)
     package.write_to_file(deck_name + '.apkg')
 
+
 if __name__ == '__main__':
     import sys
+
     main(sys.argv)
