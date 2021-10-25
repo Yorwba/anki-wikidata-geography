@@ -3,13 +3,17 @@
 Create [Anki](https://ankisrs.net) flashcards to study geography using data
 provided by [Wikidata](https://www.wikidata.org).
 
-There are currently two kinds of card:
-<ul>
-  <li>given a <b>map</b>, <b>name</b> the highlighted region</li>
-  <li>given the <b>name</b> of a region, find its location on the <b>map</b></li>
-</ul>
+There are currently four kinds of card:
+* given a **map**, name the highlighted **region**
+* given the name of a **region**, find its location on the **map**
+* given the name of a **region**, name its **capital**
+* given the **capital** of a region, name the **region**
 
-The project can generate Anki decks for the states, provinces, prefectures, boroughs, etc. of any state or region, <b>provided the information is available in Wikidata</b>. If you notice erroneous or missing information, please check the corresponding Wikidata item and modify it if necessary. If the information in Wikidata differs from that in this deck, please <a href="https://github.com/Yorwba/anki-wikidata-geography/issues">open an issue</a>. The same is true if you want to <b>request additional features</b>.
+The project can generate Anki decks for the states, provinces, prefectures, boroughs, etc. of any state or region,
+**provided the information is available in Wikidata**. If you notice erroneous or missing information, please check
+the corresponding Wikidata item and modify it if necessary. If the information in Wikidata differs from that in this
+deck, please [open an issue](https://github.com/Yorwba/anki-wikidata-geography/issues). The same is true
+if you want to **request additional features**.
 
 ## Preshared Decks
 
@@ -28,14 +32,12 @@ Generated decks for the following 10 countries have been shared on Anki:
 
 ## Dependencies
 
-This project uses [`pipenv`](https://docs.pipenv.org) to manage Python
-dependencies. To install them, run
+This project uses [`pipenv`](https://docs.pipenv.org) to manage Python dependencies. To install them, run
 ```bash
 pipenv install
 ```
 
-To render SVG images, [`rendersvg`](https://github.com/RazrFalcon/resvg/tree/master/tools/rendersvg)
-is used. You'll need to install it manually.
+To render SVG images, [`resvg`](https://github.com/RazrFalcon/resvg) is used. You'll need to install it manually.
 
 ## Usage
 
