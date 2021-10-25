@@ -252,11 +252,23 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
             font-size: 20px;
             text-align: center;
         }
+        .value > img {
+            max-width: 100%;
+            height: auto;
+        }
         #region {
             color: gray;
+            font-size: 20px;
         }
         #subdivision {
-            font-size: 30px;
+            font-size: 24px;
+        }
+        #type {
+            color: gray;
+            font-size: 20px;
+        }
+        #capital {
+            font-size: 24px;
         }
     ''',
 )
