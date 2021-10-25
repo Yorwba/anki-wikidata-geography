@@ -16,6 +16,8 @@ from wikidata.client import Client
 from wikidata.datavalue import DatavalueError
 from wikidata.entity import EntityId
 
+IMAGE_FOLDER = "img"
+
 CLIENT = Client()
 SUBDIVISIONS = CLIENT.get(EntityId('P150'))
 LOCATOR_MAP_IMAGE = CLIENT.get(EntityId('P242'))
@@ -70,11 +72,11 @@ def get_locator_map_url(entity):
 
 def download_locator_map(url, filename):
     if url.endswith('.svg'):
-        origin_map = filename + '.svg'
-        raster_map = filename + '.png'
+        origin_map = f'{IMAGE_FOLDER}/{filename}.svg'
+        raster_map = f'{IMAGE_FOLDER}/{filename}.png'
     else:
-        origin_map = filename + '.' + url.split('.')[-1]
-        raster_map = origin_map
+        origin_map = f'{IMAGE_FOLDER}/{filename}.' + url.split('.')[-1]
+        raster_map = f'{IMAGE_FOLDER}/{origin_map}'
     while True:
         req = urllib.request.Request(url)
         req.headers['Range'] = 'bytes=0-'
@@ -102,7 +104,7 @@ def create_background_map(raster_maps, region_label):
     stacked_maps = np.array([np.array(i.convert('RGBA')) for i in raster_maps])
     median = np.median(stacked_maps, axis=0)
     background = Image.fromarray(np.array(median, dtype=stacked_maps.dtype))
-    filename = region_label + '.png'
+    filename = f'{IMAGE_FOLDER}/{region_label}.png'
     background.save(filename)
     return filename
 
@@ -194,6 +196,8 @@ def main(argv):
 
     region = CLIENT.get(args.region, load=True)
     region_label = region.label[args.language]
+    if not os.path.exists(IMAGE_FOLDER):
+        os.mkdir(IMAGE_FOLDER)
     subdivision_maps = {}
     for subdivision in get_subdivisions(region):
         locator_map_url = get_locator_map_url(subdivision)
