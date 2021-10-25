@@ -111,6 +111,8 @@ def download_locator_map(url, filename):
         raster_map = f'{IMAGE_FOLDER}/{origin_map}'
     while True:
         req = urllib.request.Request(url)
+        req.headers['User-Agent'] \
+            = 'AnkiWikidataGeography/1.0 (https://github.com/Yorwba/anki-wikidata-geography) generic-library/1.0'
         req.headers['Range'] = 'bytes=0-'
         with urllib.request.urlopen(req) as map_file:
             try:
