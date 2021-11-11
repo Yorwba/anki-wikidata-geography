@@ -22,7 +22,6 @@ from wikidata.entity import EntityId
 handler = colorlog.StreamHandler()
 handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s[%(levelname)s] %(message)s'))
 logger = colorlog.getLogger('anki-geo')
-logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 CLIENT = Client()
@@ -287,15 +286,20 @@ def main(argv):
     parser.add_argument('region', help="Wikidata Q-item identifier")
     parser.add_argument('--language', default='en', help="Language of the generated deck")
     parser.add_argument('--image-folder', default='/tmp', help="Folder to store temporary images, '/tmp' by default")
+    parser.add_argument('--log-level', default='INFO', choices=['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG'])
     args = parser.parse_args(argv[1:])
+
+    logger.setLevel(args.log_level)
 
     region = CLIENT.get(args.region, load=True)
     region_label = region.label[args.language]
-    image_folder = args.image_folder
-    logger.info(f'Image folder {image_folder}')
     logger.info(f'Building deck for {region_label}')
+
+    image_folder = args.image_folder
+    logger.debug(f'Image folder {image_folder}')
     if not os.path.exists(image_folder):
         os.mkdir(image_folder)
+
     subdivision_maps = {}
     for subdivision in get_subdivisions(region):
         subdivision_label = subdivision.label[args.language]
