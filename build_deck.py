@@ -79,6 +79,23 @@ def try_get_label_in(entity, language):
         return try_get_label_in(entity, fallback)
 
 
+def try_get_wikilink_in(entity, language):
+    if language is None:
+        return next(iter(entity.data['sitelinks'].values()))['url']
+    try:
+        sitename = language.replace('-', '_')+'wiki'
+        return entity.data['sitelinks'][sitename]['url']
+    except KeyError:
+        if '-' in language:
+            fallback = language.split('-')[0]
+        elif language == 'en':
+            fallback = None
+        else:
+            fallback = 'en'
+        logger.warning(f'No {language} wiki for {entity.label}, trying {fallback or "default"}.')
+        return try_get_wikilink_in(entity, fallback)
+
+
 def get_subdivisions(entity, date=None):
     if date is None:
         date = datetime.date.today()
@@ -163,7 +180,8 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
         {'name': 'SubdivisionMap'},
         {'name': 'RegionMap'},
         {'name': 'WikidataId'},
-        {'name': 'Language'}
+        {'name': 'Language'},
+        {'name': 'WikipediaLink'},
     ],
     templates=[
         {
@@ -182,7 +200,7 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <hr>
                     <div class="value">{{SubdivisionMap}}</div>
                     <hr>
-                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Subdivision}}"
+                    <iframe src="{{WikipediaLink}}"
                         style="height: 100vh; width:100%;" seamless="seamless"></iframe>
                     <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
                         Data source: Wikidata
@@ -205,7 +223,7 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <hr>
                     <div class="value">{{SubdivisionMap}}</div>
                     <hr>
-                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Subdivision}}"
+                    <iframe src="{{WikipediaLink}}"
                         style="height: 100vh; width:100%;" seamless="seamless"></iframe>
                     <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
                         Data source: Wikidata
@@ -231,8 +249,11 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <hr>
                     <div id="type">Capital</div>
                     <div id="capital">{{Capital}}</div>
-                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Capital}}"
+                    <iframe src="{{WikipediaLink}}"
                         style="height: 100vh; width:100%;" seamless="seamless"></iframe>
+                    <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
+                        Data source: Wikidata
+                    </a>
                 ''',
         },
         {
@@ -254,8 +275,11 @@ REGION_SUBDIVISION_MODEL = genanki.Model(
                     <hr>
                     <div id="type">Capital</div>
                     <div id="capital">{{Capital}}</div>
-                    <iframe src="https://{{Language}}.wikipedia.org/wiki/{{Subdivision}}"
+                    <iframe src="{{WikipediaLink}}"
                         style="height: 100vh; width:100%;" seamless="seamless"></iframe>
+                    <a href="https://www.wikidata.org/wiki/{{WikidataId}}">
+                        Data source: Wikidata
+                    </a>
                 ''',
         },
     ],
@@ -367,7 +391,8 @@ def main(argv):
                         f'<img src="{os.path.basename(smallest_map)}">',
                         f'<img src="{os.path.basename(background_map)}">',
                         subdivision.id,
-                        args.language
+                        args.language,
+                        try_get_wikilink_in(subdivision, args.language),
                     ]
                 )
             )
