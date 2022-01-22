@@ -65,6 +65,20 @@ def try_get_string_property(entity, prop):
         return None
 
 
+def try_get_label_in(entity, language):
+    if language is None:
+        return str(entity.label)
+    try:
+        return entity.label[language]
+    except KeyError:
+        if '-' in language:
+            fallback = language.split('-')[0]
+        else:
+            fallback = None
+        logger.warning(f'No {language} translation for {entity.label}, trying {fallback or "default"}.')
+        return try_get_label_in(entity, fallback)
+
+
 def get_subdivisions(entity, date=None):
     if date is None:
         date = datetime.date.today()
@@ -295,7 +309,7 @@ def main(argv):
     logger.setLevel(args.log_level)
 
     region = CLIENT.get(args.region, load=True)
-    region_label = region.label[args.language]
+    region_label = try_get_label_in(region, args.language)
     logger.info(f'Building deck for {region_label}')
 
     image_folder = args.image_folder
@@ -310,7 +324,7 @@ def main(argv):
         logger.debug(f'Image folder {image_folder}')
         subdivision_maps = {}
         for subdivision in get_subdivisions(region):
-            subdivision_label = subdivision.label[args.language]
+            subdivision_label = try_get_label_in(subdivision, args.language)
             logger.debug(f'Making map for {subdivision.id}, {subdivision_label}')
             locator_map_url = get_locator_map_url(subdivision)
             if locator_map_url is None:
@@ -333,24 +347,21 @@ def main(argv):
         media_files = [background_map]
 
         for subdivision, maps in subdivision_maps.items():
+            subdivision_label = try_get_label_in(subdivision, args.language)
             smallest_map = min(maps, key=lambda path: os.stat(path).st_size)
             media_files.append(smallest_map)
-            logger.debug(f'Building cards for {subdivision.id}, {subdivision.label[args.language]}')
+            logger.debug(f'Building cards for {subdivision.id}, {subdivision_label}')
             capital = try_get_string_property(subdivision, CAPITAL)
             if capital is None:
                 capital_label = ""
             else:
-                try:
-                    capital_label = capital.label[args.language]
-                except KeyError:
-                    capital_label = capital.label["en"]
-                    logger.warning(f'No {args.language} translation for {capital_label}, using English')
+                capital_label = try_get_label_in(capital, args.language)
                 logger.debug(f'Capital: {capital.id}, {capital_label}')
             deck.add_note(
                 RegionSubdivisionNote(
                     model=REGION_SUBDIVISION_MODEL,
                     fields=[
-                        subdivision.label[args.language],
+                        subdivision_label,
                         region_label,
                         capital_label,
                         f'<img src="{os.path.basename(smallest_map)}">',
