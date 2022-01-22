@@ -2,6 +2,7 @@
 
 import argparse
 from collections import Counter
+from contextlib import nullcontext
 import datetime
 import hashlib
 import http.client
@@ -287,6 +288,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Generate Anki geography deck from Wikidata')
     parser.add_argument('region', help="Wikidata Q-item identifier")
     parser.add_argument('--language', default='en', help="Language of the generated deck")
+    parser.add_argument('--image-folder', default=None, help="Folder to store images, new temporary folder by default")
     parser.add_argument('--log-level', default='INFO', choices=['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG'])
     args = parser.parse_args(argv[1:])
 
@@ -296,7 +298,16 @@ def main(argv):
     region_label = region.label[args.language]
     logger.info(f'Building deck for {region_label}')
 
-    with tempfile.TemporaryDirectory() as image_folder:
+    image_folder = args.image_folder
+    if image_folder is not None:
+        if not os.path.exists(image_folder):
+            os.mkdir(image_folder)
+        context_manager = nullcontext(image_folder)
+    else:
+        context_manager = tempfile.TemporaryDirectory()
+
+    with context_manager as image_folder:
+        logger.debug(f'Image folder {image_folder}')
         subdivision_maps = {}
         for subdivision in get_subdivisions(region):
             subdivision_label = subdivision.label[args.language]
