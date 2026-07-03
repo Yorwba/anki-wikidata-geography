@@ -19,16 +19,16 @@ if you want to **request additional features**.
 
 Generated decks for the following 10 countries have been shared on Anki:
 
-  * [Brazil](https://ankiweb.net/shared/info/1234388697)
-  * [Canada](https://ankiweb.net/shared/info/1361428941)
-  * [France](https://ankiweb.net/shared/info/1622455817)
-  * [Germany](https://ankiweb.net/shared/info/1265574894)
-  * [India](https://ankiweb.net/shared/info/1738560117)
+  * [Brazil](https://ankiweb.net/shared/info/284203093)
+  * [Canada](https://ankiweb.net/shared/info/1652620753)
+  * [France](https://ankiweb.net/shared/info/960750779)
+  * [Germany](https://ankiweb.net/shared/info/1261558972)
+  * [India](https://ankiweb.net/shared/info/2119323166)
   * [Italy](https://ankiweb.net/shared/info/1530926636)
-  * [Japan](https://ankiweb.net/shared/info/1505876686)
-  * [People's Republic of China](https://ankiweb.net/shared/info/1579428780)
-  * [United Kingdom](https://ankiweb.net/shared/info/762007376)
-  * [United States of America](https://ankiweb.net/shared/info/374512320)
+  * [Japan](https://ankiweb.net/shared/info/1101516738)
+  * [People's Republic of China](https://ankiweb.net/shared/info/1435793939)
+  * [United Kingdom](https://ankiweb.net/shared/info/1648948473)
+  * [United States of America](https://ankiweb.net/shared/info/1136160652)
 
 ## Dependencies
 
