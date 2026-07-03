@@ -8,6 +8,7 @@ import hashlib
 import http.client
 import os
 import subprocess
+import urllib.parse
 import urllib.request
 import colorlog  # https://github.com/borntyping/python-colorlog
 from os.path import exists
@@ -122,7 +123,7 @@ def get_locator_map_url(entity):
     except:
         maps = []
     urls = [i.image_url for i in maps]
-    svg_urls = [url for url in urls if url.endswith('.svg')]
+    svg_urls = [url for url in urls if urllib.parse.urlparse(url).path.endswith('.svg')]
     if svg_urls:
         return svg_urls[0]
     en_label = entity.label['en']
@@ -134,11 +135,12 @@ def get_locator_map_url(entity):
 
 
 def download_locator_map(url, image_folder, filename):
-    if url.endswith('.svg'):
+    url_parsed = urllib.parse.urlparse(url)
+    if url_parsed.path.endswith('.svg'):
         origin_map = f'{image_folder}/{filename}.svg'
         raster_map = f'{image_folder}/{filename}.png'
     else:
-        origin_map = f'{image_folder}/{filename}.' + url.split('.')[-1]
+        origin_map = f'{image_folder}/{filename}.' + url_parsed.path.split('.')[-1]
         raster_map = f'{origin_map}'
     while True:
         req = urllib.request.Request(url)
