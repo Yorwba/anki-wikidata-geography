@@ -49,6 +49,8 @@ def try_get_time_property(entity, prop):
         result = entity.get(prop)
         if isinstance(result, int):  # if property contains an int, assume it is year and return the 1st of January
             result = datetime.date(result, 1, 1)
+        elif isinstance(result, tuple):  # assume (year, month)
+            result = datetime.date(*result)
         return result
     except DatavalueError:
         return None  # TODO: fix wikidata package to handle dates better
