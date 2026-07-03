@@ -82,12 +82,20 @@ def try_get_label_in(entity, language):
         return try_get_label_in(entity, fallback)
 
 
+def make_wikilink(language, title):
+    return f'https://{language}.wikipedia.org/wiki/{title}'
+
+
 def try_get_wikilink_in(entity, language):
     if language is None:
-        return next(iter(entity.data['sitelinks'].values()))['url']
+        for sitename, value in entity.data['sitelinks'].items():
+            # just pick the first hit
+            language = sitename.removesuffix('wiki').replace('_', '-')
+            return make_wikilink(language, value['title'])
     try:
         sitename = language.replace('-', '_')+'wiki'
-        return entity.data['sitelinks'][sitename]['url']
+        title = entity.data['sitelinks'][sitename]['title']
+        return make_wikilink(language, title)
     except KeyError:
         if '-' in language:
             fallback = language.split('-')[0]
