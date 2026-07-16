@@ -26,7 +26,9 @@ Generated decks for the following 10 countries have been shared on Anki:
   * [India](https://ankiweb.net/shared/info/2119323166)
   * [Italy](https://ankiweb.net/shared/info/1530926636)
   * [Japan](https://ankiweb.net/shared/info/1101516738)
+  * [Netherlands](https://ankiweb.net/shared/info/296695465)
   * [People's Republic of China](https://ankiweb.net/shared/info/1435793939)
+  * [Switzerland](https://ankiweb.net/shared/info/176416336)
   * [United Kingdom](https://ankiweb.net/shared/info/1648948473)
   * [United States of America](https://ankiweb.net/shared/info/1136160652)
 
